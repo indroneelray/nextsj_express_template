@@ -1,22 +1,27 @@
-// server.js
-const { createServer } = require('http')
-const { parse } = require('url')
+const express = require('express')
 const next = require('next')
-const PORT = process.env.PORT || 3000
+require('dotenv').config()
 
+    
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const handle = app.getRequestHandler()
-
-app.prepare().then(() => {
-  createServer((req, res) => {
-    // Be sure to pass `true` as the second argument to `url.parse`.
-    // This tells it to parse the query portion of the URL.
-
-      handle(req, res, parsedUrl)
+const PORT = process.env.PORT
     
-  }).listen(PORT, (err) => {
-    if (err) throw err
-    console.log('> Ready on http://localhost:3000')
+app.prepare()
+.then(() => {
+  const server = express()
+    
+  server.get('*', (req, res) => {
+    return handle(req, res)
   })
+    
+  server.listen(PORT, (err) => {
+    if (err) throw err
+    console.log('> Ready on http://localhost:' + PORT)
+  })
+})
+.catch((ex) => {
+  console.error(ex.stack)
+  process.exit(1)
 })
